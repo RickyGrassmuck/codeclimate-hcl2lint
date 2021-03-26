@@ -104,8 +104,9 @@ func PrintIssue(issue *Issue) (err error) {
 		return err
 	}
 
-	jsonOutput = append(jsonOutput, 0)
-	os.Stdout.Write(jsonOutput)
+	jsonOutput = append(jsonOutput)
+	output := string(jsonOutput) + "\n"
+	os.Stdout.Write([]byte(output))
 
 	return nil
 }
@@ -117,8 +118,9 @@ func PrintWarning(warning *Warning) (err error) {
 		return err
 	}
 
-	jsonOutput = append(jsonOutput, 0)
-	os.Stdout.Write(jsonOutput)
+	jsonOutput = append(jsonOutput)
+	output := string(jsonOutput) + "\n"
+	os.Stdout.Write([]byte(output))
 
 	return nil
 }
