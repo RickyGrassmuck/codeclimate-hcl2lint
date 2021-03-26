@@ -21,12 +21,12 @@ func main() {
 		fmt.Fprintf(os.Stderr, "Error loading config: %s", err)
 		os.Exit(1)
 	}
-
 	analysisFiles, err := HCL2FileWalk(rootPath, IncludePaths(rootPath, config))
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error initializing: %s", err)
 		os.Exit(1)
 	}
+	fmt.Fprintf(os.Stderr, "%s", analysisFiles)
 
 	for _, path := range analysisFiles {
 		processFile(path, nil)
@@ -37,11 +37,8 @@ func parseHCL2Error(diag *hcl.Diagnostic) Issue {
 	var locationParse []string
 
 	firstParse := strings.Split(diag.Subject.String(), ":")
-	fmt.Println(firstParse)
 
 	if len(firstParse) == 2 {
-		// location.Path = firstParse[0]
-
 		locationParse = strings.Split(firstParse[1], ",")
 		positionParse := strings.Split(locationParse[1], "-")
 		line, _ := strconv.Atoi(locationParse[0])
@@ -84,14 +81,14 @@ func processFile(fn string, in *os.File) {
 	if in == nil {
 		in, err = os.Open(fn)
 		if err != nil {
-			fmt.Errorf("failed to open %s: %s", fn, err)
+			fmt.Printf("failed to open %s: %s", fn, err)
 			os.Exit(1)
 		}
 	}
 
 	inSrc, err := ioutil.ReadAll(in)
 	if err != nil {
-		fmt.Errorf("failed to read %s: %s", fn, err)
+		fmt.Printf("failed to read %s: %s", fn, err)
 		os.Exit(1)
 	}
 

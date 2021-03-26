@@ -55,15 +55,20 @@ func HCL2FileWalk(rootPath string, includePaths []string) (fileList []string, er
 	}
 
 	err = filepath.Walk(rootPath, walkFunc)
-
 	return fileList, err
 }
 
 func LoadConfig() (config map[string]interface{}, err error) {
 	var parsedConfig map[string]interface{}
+	var configPath string
+	var ok bool
 
-	if _, err := os.Stat("/config.json"); err == nil {
-		data, err := ioutil.ReadFile("/config.json")
+	if configPath, ok = os.LookupEnv("CC_CONFIG"); !ok {
+		configPath = "/config.json"
+	}
+
+	if _, err := os.Stat(configPath); err == nil {
+		data, err := ioutil.ReadFile(configPath)
 		if err != nil {
 			return nil, err
 		}
