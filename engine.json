@@ -1,0 +1,13 @@
+{
+  "name": "hcl2fmt",
+  "description": "hcl2fmt is a linter/formatter for HCL2.",
+  "maintainer": {
+    "name": "Ricky Grassmuck",
+    "email": "rigrassm@gmail.com"
+  },
+  "languages": [
+    "HCL2"
+  ],
+  "version": "1.0.0",
+  "spec_version": "0.3.1"
+}
