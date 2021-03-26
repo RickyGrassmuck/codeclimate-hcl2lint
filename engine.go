@@ -1,4 +1,4 @@
-package Utils
+package main
 
 import "fmt"
 import "os"
@@ -6,8 +6,6 @@ import "strings"
 import "encoding/json"
 import "path/filepath"
 import "io/ioutil"
-
-type Config map[string]interface{}
 
 type LinesOnlyPosition struct {
 	Begin int `json:"begin,omitempty"`
@@ -49,8 +47,7 @@ var HCL2FileExtensions = []string{".hcl", ".tf", ".nomad"}
 
 func HCL2FileWalk(rootPath string, includePaths []string) (fileList []string, err error) {
 	walkFunc := func(path string, f os.FileInfo, err error) error {
-
-		if prefixInArr(path, HCL2FileExtensions) && prefixInArr(path, includePaths) {
+		if suffixInArr(path, HCL2FileExtensions) && prefixInArr(path, includePaths) {
 			fileList = append(fileList, path)
 			return nil
 		}
@@ -120,7 +117,14 @@ func PrintWarning(warning *Warning) (err error) {
 
 	return nil
 }
-
+func suffixInArr(str string, suffixes []string) bool {
+	for _, suffix := range suffixes {
+		if strings.HasSuffix(str, suffix) {
+			return true
+		}
+	}
+	return false
+}
 func prefixInArr(str string, prefixes []string) bool {
 	for _, prefix := range prefixes {
 		if strings.HasPrefix(str, prefix) {

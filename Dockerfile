@@ -1,4 +1,4 @@
-ARG BASE=1.13.1-alpine3.10
+ARG BASE=1.16.2-alpine3.13
 FROM golang:${BASE} as build
 
 WORKDIR /usr/src/app
@@ -8,9 +8,9 @@ COPY engine.json ./engine.json.template
  RUN export go_version=$(go version | cut -d ' ' -f 3) && \
      cat engine.json.template | jq '.version = .version + "/" + env.go_version' > ./engine.json
 
-COPY codeclimate-hcl2lint.go go.mod go.sum Utils ./
+COPY codeclimate-hcl2lint.go engine.go go.mod go.sum  ./
 RUN apk add --no-cache git
-RUN go build -o codeclimate-hcl2lint .
+RUN go version && go build -o codeclimate-hcl2lint codeclimate-hcl2lint.go engine.go 
 
 FROM golang:${BASE}
 LABEL maintainer="Ricky Grassmuck <rigrassm@gmail.com>"

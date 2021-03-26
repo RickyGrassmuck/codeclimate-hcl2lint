@@ -9,7 +9,6 @@ import (
 
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/hclparse"
-	"github.com/rigrassm/codeclimate-hcl2lint/Utils"
 )
 
 var parser = hclparse.NewParser()
@@ -17,13 +16,13 @@ var parser = hclparse.NewParser()
 func main() {
 	rootPath := "/code/"
 
-	config, err := Utils.LoadConfig()
+	config, err := LoadConfig()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error loading config: %s", err)
 		os.Exit(1)
 	}
 
-	analysisFiles, err := Utils.HCL2FileWalk(rootPath, Utils.IncludePaths(rootPath, config))
+	analysisFiles, err := HCL2FileWalk(rootPath, IncludePaths(rootPath, config))
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error initializing: %s", err)
 		os.Exit(1)
@@ -34,43 +33,50 @@ func main() {
 	}
 }
 
-func parseHCL2Error(diag *hcl.Diagnostic) Utils.Issue {
-	var location Utils.Location
+func parseHCL2Error(diag *hcl.Diagnostic) Issue {
 	var locationParse []string
 
 	firstParse := strings.Split(diag.Subject.String(), ":")
+	fmt.Println(firstParse)
 
 	if len(firstParse) == 2 {
-		location.Path = firstParse[0]
+		// location.Path = firstParse[0]
 
 		locationParse = strings.Split(firstParse[1], ",")
-
-		location.Lines.Begin, _ = strconv.Atoi(locationParse[0])
-		location.Lines.End, _ = strconv.Atoi(locationParse[0])
 		positionParse := strings.Split(locationParse[1], "-")
-
-		beginColumn, _ := strconv.Atoi(positionParse[0])
+		line, _ := strconv.Atoi(locationParse[0])
+		startColumn, _ := strconv.Atoi(positionParse[0])
 		endColumn, _ := strconv.Atoi(positionParse[1])
 
-		location.Positions.Begin = &Utils.LineColumn{
-			Line:   location.Lines.Begin,
-			Column: beginColumn,
+		location := &Location{
+			Path: firstParse[0],
+			Lines: &LinesOnlyPosition{
+				Begin: line,
+				End:   line,
+			},
+			Positions: &LineColumnPosition{
+				Begin: &LineColumn{
+					Line:   line,
+					Column: startColumn,
+				},
+				End: &LineColumn{
+					Line:   line,
+					Column: endColumn,
+				},
+			},
 		}
-		location.Positions.End = &Utils.LineColumn{
-			Line:   location.Lines.Begin,
-			Column: endColumn,
-		}
-		issue := Utils.Issue{
+
+		issue := Issue{
 			Type:              "issue",
 			Check:             codeClimateCheckName(diag),
 			Description:       diag.Detail,
 			RemediationPoints: 50000,
 			Categories:        []string{"Syntax"},
-			Location:          &location,
+			Location:          location,
 		}
 		return issue
 	}
-	return Utils.Issue{}
+	return Issue{}
 }
 
 func processFile(fn string, in *os.File) {
@@ -91,8 +97,8 @@ func processFile(fn string, in *os.File) {
 
 	_, problems := parser.ParseHCL(inSrc, fn)
 	for _, problem := range problems {
-		var issue Utils.Issue = parseHCL2Error(problem)
-		Utils.PrintIssue(&issue)
+		var issue Issue = parseHCL2Error(problem)
+		PrintIssue(&issue)
 	}
 }
 
